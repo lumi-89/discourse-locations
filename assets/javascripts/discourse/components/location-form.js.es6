@@ -1,29 +1,34 @@
-import { default as computed, on } from 'ember-addons/ember-computed-decorators';
+import { default as discourseComputed, on } from 'discourse-common/utils/decorators';
 import { geoLocationSearch, providerDetails } from '../lib/location-utilities';
 import { getOwner } from 'discourse-common/lib/get-owner';
+import Component from '@ember/component';
+import { equal } from "@ember/object/computed";
+import { A } from "@ember/array";
+import { set } from "@ember/object";
+import I18n from "I18n";
 
-export default Ember.Component.extend({
-  geoLocationOptions: Ember.A(),
+export default Component.extend({
+  geoLocationOptions: A(),
   classNames: ['location-form'],
   inputFields: ['street', 'postalcode', 'city', 'countrycode'],
   hasSearched: false,
   context: null,
   showProvider: false,
   showGeoLocation: true,
-  showTitle: Ember.computed.equal('appType', 'discourse'),
+  showTitle: equal('appType', 'discourse'),
 
-  @computed('inputFieldsEnabled', 'settings')
+  @discourseComputed('inputFieldsEnabled', 'settings')
   showInputFields(inputFieldsEnabled, settings) {
     if (inputFieldsEnabled === false) return false;
     return inputFieldsEnabled || settings.location_input_fields_enabled;
   },
 
-  @computed('showInputFields', 'inputFields')
+  @discourseComputed('showInputFields', 'inputFields')
   showAddress(showInputFields, inputFields) {
     return !showInputFields || (showInputFields && (inputFields.filter(f => f !== 'coordinates').length > 0));
   },
 
-  @computed('appType')
+  @discourseComputed('appType')
   settings(appType) {
     return appType === 'wizard' ? Wizard.SiteSettings : Discourse.SiteSettings;
   },
@@ -77,7 +82,7 @@ export default Ember.Component.extend({
     }
   },
 
-  @computed('provider', 'settings.location_geocoding_provider')
+  @discourseComputed('provider', 'settings.location_geocoding_provider')
   providerDetails(provider, locationGeocodingProvider) {
     return providerDetails[provider || locationGeocodingProvider];
   },
@@ -86,12 +91,12 @@ export default Ember.Component.extend({
     if (this.get('showGeoLocation') && e.keyCode === 13) this.send('locationSearch');
   },
 
-  @computed('street', 'neighbourhood', 'postalcode', 'city')
+  @discourseComputed('street', 'neighbourhood', 'postalcode', 'city')
   searchDisabled(street, neighbourhood, postalcode, city) {
     return !street && !neighbourhood && !postalcode && !city;
   },
 
-  @computed('settings.location_geocoding')
+  @discourseComputed('settings.location_geocoding')
   searchLabel: (locationGeocoding) => I18n.t(`location.geo.btn.${locationGeocoding}`),
 
   actions: {
@@ -100,7 +105,7 @@ export default Ember.Component.extend({
       this.set('geoLocation', gl);
       const options = this.get('geoLocationOptions');
       options.forEach((o) => {
-        Ember.set(o, 'selected', o['address'] === gl['address']);
+        set(o, 'selected', o['address'] === gl['address']);
       });
     },
 

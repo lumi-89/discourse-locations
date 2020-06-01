@@ -1,8 +1,9 @@
 import MountWidget from 'discourse/components/mount-widget';
-import { observes, on } from 'ember-addons/ember-computed-decorators';
+import { observes, on } from 'discourse-common/utils/decorators';
+import { scheduleOnce } from "@ember/runloop";
 
 export default MountWidget.extend({
-  classNames: 'map-component',
+  classNameBindings: [':map-component', ':map-container', 'size'],
   widget: 'map',
   clickable: false,
 
@@ -42,7 +43,7 @@ export default MountWidget.extend({
   },
 
   scheduleSetup() {
-    Ember.run.scheduleOnce('afterRender', () => {
+    scheduleOnce('afterRender', () => {
       this.appEvents.trigger('dom:clean');
     });
   }

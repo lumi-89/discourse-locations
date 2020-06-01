@@ -3,6 +3,7 @@ import { h } from 'virtual-dom';
 import RawHtml from 'discourse/widgets/raw-html';
 import { avatarImg } from 'discourse/widgets/post';
 import { generateMap, setupMap, addMarkersToMap, addCircleMarkersToMap } from '../lib/map-utilities';
+import { scheduleOnce } from "@ember/runloop";
 
 export default createWidget('map', {
   tagName: 'div.locations-map',
@@ -16,6 +17,7 @@ export default createWidget('map', {
       runSetup: true,
       showSearch: false,
       locations: attrs.locations || [],
+      showExpand: !attrs.disableExpand
     };
   },
 
@@ -220,7 +222,7 @@ export default createWidget('map', {
   },
 
   toggleSearch() {
-    Ember.run.scheduleOnce('afterRender', this, () => {
+    scheduleOnce('afterRender', this, () => {
       // resetinng the val puts the cursor at the end of the text on focus
       const $input = $('#map-search-input');
       const val = $input.val();
@@ -276,7 +278,7 @@ export default createWidget('map', {
     if (state.runSetup || attrs.runSetup) {
       state.runSetup = false;
 
-      Ember.run.scheduleOnce('afterRender', this, () => {
+      scheduleOnce('afterRender', this, () => {
         this.setupMap();
       });
 
@@ -330,14 +332,19 @@ export default createWidget('map', {
         );
       }
     }
+    
+    if (state.showExpand) {
+      contents.push(
+        this.attach('button', {
+          className: `btn btn-map map-expand`,
+          action: 'toggleExpand',
+          actionParam: category,
+          icon: state.mapToggle
+        })
+      )
+    }
 
     contents.push(
-      this.attach('button', {
-        className: `btn btn-map map-expand`,
-        action: 'toggleExpand',
-        actionParam: category,
-        icon: state.mapToggle
-      }),
       this.attach('button', {
         className: 'btn btn-map map-attribution',
         action: 'toggleAttribution',

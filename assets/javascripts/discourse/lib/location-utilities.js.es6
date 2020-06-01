@@ -1,4 +1,6 @@
 import { ajax } from './ajax';
+import { Promise } from "rsvp";
+import I18n from "I18n";
 
 function locationSearch(request, resultsFn) {
   ajax({
@@ -27,7 +29,7 @@ var debouncedLocationSearch = _.debounce(locationSearch, settings.location_geoco
 let geoLocationSearch = (request) => {
   if (!request) return;
 
-  return new Ember.RSVP.Promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     debouncedLocationSearch(request, function(r) {
       if (r.error) {
         reject(r.message);
@@ -77,8 +79,6 @@ let geoLocationFormat = function(geoLocation, opts = {}) {
   if (!geoLocation) return;
   let result;
   
-  console.log('opts: ', opts);
-
   if (opts.geoAttrs && opts.geoAttrs.length > 0) {
     result = formatLocation(geoLocation, opts.geoAttrs);
   } else if (geoLocation.address) {

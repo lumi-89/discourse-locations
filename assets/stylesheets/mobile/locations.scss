@@ -46,34 +46,9 @@
   height: calc(100vh - 55px);
 }
 
-.location-details .map-component {
-  width: calc(100vw - 20px);
-  right: 0;
-  left: initial;
-}
-
-.location-details .location-label-container {
-  margin-right: initial;
-
-  .location-label {
-    margin-right: 5px;
-    position: relative;
-  }
-
-  .location-topic-map {
-    position: initial;
-
-    .fa {
-      margin: 0;
-      min-width: 15px;
-    }
-  }
-}
-
-#user-card .location-and-website,
-.user-main .location-and-website.map-location-enabled {
-  &  .locations-map {
-    min-width: 300px;
-    width: 100%;
+.user-main .about .primary .primary-textual .location-and-website.map-location-enabled {
+  > span {
+    max-width: 100%;
+    padding: 0px;
   }
 }

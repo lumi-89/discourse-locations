@@ -1,3 +1,6 @@
+@import 'locations-user';
+@import 'locations-form';
+
 .content-wrapper > aside:first-of-type {
   z-index: 3;
 }
@@ -15,64 +18,12 @@
 }
 
 .add-location .location-form {
-  .p-list-box {
+  .location-results {
     margin-top: 20px;
   }
 }
 
-.location-form {
-  display: flex;
-
-  .title {
-    font-weight: 700;
-  }
-
-  .address {
-    padding-right: 20px;
-  }
-
-  .coordinates {
-    .control-group {
-      display: block;
-
-      .controls {
-        display: flex;
-        width: 100%;
-
-        input {
-          width: 100px;
-        }
-      }
-
-      .icon {
-        margin-left: 10px;
-        display: inline-block;
-      }
-    }
-
-    .icon img {
-      max-width: 30px;
-    }
-  }
-
-  .address + .coordinates {
-    border-left: 1px solid $primary-low;
-    padding-left: 20px;
-  }
-}
-
-.location-form-instructions {
-  color: #919191;
-  margin: 5px 0;
-  font-size: 80%;
-  line-height: 1.4em;
-
-  a {
-    text-decoration: underline;
-  }
-}
-
-.location-form, .add-location {
+.add-location {
   overflow: visible;
 
   .control-group {
@@ -100,60 +51,19 @@
   margin: 5px 10px;
 }
 
-input.input-location, div.input-location {
-  max-height: 150px;
-  background-color: $secondary;
-  box-shadow: none;
-  box-sizing: border-box;
-  margin: 0;
-}
-
-.input-location .select2-choice {
-  padding: 2px 5px;
-}
-
-.input-location.input-small {
-  width: 100px;
-}
-
-.location-selector-container {
-  position: relative;
-
-  .ac-wrap {
-    box-sizing: border-box;
-
-    .ac-loading {
-      position: absolute;
-      top: 7px;
-      right: 5px;
-    }
-
-    .item {
-      line-height: 1.6;
-    }
-
-    .autocomplete {
-      width: inherit;
-      left: 0 !important;
-      width: 100%;
-      top: 30px !important;
-      box-sizing: border-box;
-
-      li, .no-results {
-        padding: 10px;
-      }
-
-      ul > label {
-        @extend .location-form-instructions;
-        padding: 0 5px;
-      }
-    }
-  }
-}
-
-
 .location-form-title {
   display: inline-block;
+}
+
+.map-container.small {
+  position: absolute;
+  z-index: 9999;
+  top: initial;
+  right: 0;
+  width: 330px;
+  height: 250px;
+  top: 30px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
 }
 
 .composer-controls-location {
@@ -162,92 +72,6 @@ input.input-location, div.input-location {
 
 .add-location-btn, .add-location-btn + button {
   border: 1px solid $primary-medium;
-}
-
-.location-details {
-  position: relative;
-  margin-top: 7px;
-
-  .location-label-container {
-    display: flex;
-    align-items: center;
-
-    .location-label {
-      line-height: 18px;
-      max-width: 500px;
-      display: inline-block;
-
-      .fa {
-        margin-right: 4px;
-      }
-    }
-
-    .location-topic-map {
-      white-space: nowrap;
-      position: relative;
-      display: inline-block;
-      margin-left: 8px;
-
-      .map-component {
-        position: absolute;
-        z-index: 9999;
-        top: initial;
-        bottom: -253px;
-        box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-      }
-    }
-  }
-}
-
-.location-form-label {
-  background-color: dark-light-diff($primary, $secondary, 95%, -85%);
-  padding: 10px 15px;
-  position: absolute;
-  top: 41px;
-  z-index: 10;
-  width: 300px;
-
-  label {
-    font-size: 1em;
-  }
-
-  a {
-    text-decoration: underline;
-    color: $primary;
-  }
-
-  a, span {
-    font-style: italic;
-  }
-
-  .fa {
-    margin-right: 5px;
-  }
-}
-
-.location-form-result {
-  cursor: pointer;
-  background-color: $secondary;
-  display: flex;
-
-  &:hover, &.selected {
-    background-color: $tertiary;
-    color: white;
-
-    label {
-      color: white;
-    }
-  }
-
-  label {
-    flex: 1 1 auto;
-    margin-bottom: 0;
-    cursor: pointer;
-  }
-
-  i {
-    margin-right: 5px;
-  }
 }
 
 .location-form-map {
@@ -264,50 +88,6 @@ input.input-location, div.input-location {
 
 .form-element + span {
   display: block;
-}
-
-////
-
-.p-list-box {
-  max-width: 550px;
-  position: relative;
-
-  .spinner {
-    position: absolute;
-    right: 50%;
-    top: 50%;
-  }
-
-  .p-text {
-    margin-bottom: 5px;
-  }
-
-  ul {
-    background-color: dark-light-diff($primary, $secondary, 97%, -65%);
-    border: 1px solid #e9e9e9;
-    margin: 0;
-    list-style: none;
-    height: 95px;
-    overflow: scroll;
-  }
-
-  li {
-    padding: 6px 12px;
-  }
-
-  .no-results {
-    padding: 15px;
-  }
-
-  .default {
-    margin: 0 auto;
-    top: 50%;
-    transform: translateY(-50%);
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    color: #919191;
-  }
 }
 
 .map-component {
@@ -429,14 +209,15 @@ input.input-location, div.input-location {
       z-index: 202;
     }
 
-    .leaflet-bar {
+    .leaflet-control-container .leaflet-bar {
       box-shadow: none;
       margin: 3px;
 
-      a {
+      a, &.leaflet-control a[href] {
         width: 24px;
         height: 25px;
         line-height: 23px;
+        text-decoration: none;
 
         &:hover {
           background-color: $secondary;
@@ -526,11 +307,11 @@ input.input-location, div.input-location {
   }
 }
 
-.topic-list-item .d-icon-map-marker {
+.topic-list-item .d-icon-map-marker-alt {
   color: $primary;
 }
 
-.topic-list-item.visited .d-icon-map-marker {
+.topic-list-item.visited .d-icon-map-marker-alt {
   color: $primary-medium;
 }
 
@@ -628,128 +409,33 @@ input.input-location, div.input-location {
   }
 }
 
-.user-preferences .location-selector-container {
-  max-width: 552px;
-
-  .ac-wrap {
-    width: 100% !important;
-  }
-}
-
-.user-location-warning {
-  margin-top: 5px;
-}
-
-@media (max-width: 850px) {
-  .user-preferences .location-selector-container {
-    max-width: 472px;
-  }
-}
-
-.users-nav {
-  margin: 20px 0;
-
-  ul {
-    margin: 0;
-  }
-}
-
-.users-map-container {
-  margin-bottom: 60px;
-}
-
-.users-map-container .map-component {
-  width: 100%;
-  height: calc(100vh - 270px);
-  margin-top: 5px;
-}
-
-#user-card .location-and-website.map-location-enabled {
-  .location,
-  .website-name {
-    display: none;
-  }
-  
-  .replace-location .location,
-  .replace-location .website-name {
-    display: block;
-  }
-  
-  .btn-show-map {
-    background-color: transparent;
-    color: $primary-high;
-    margin: 0;
-    padding: 0px 8px;
-    min-height: 0;
-    
-    .d-icon {
-      color: $primary-high;
-    }
-    
-    &:hover,
-    &:hover .d-icon {
-      color: $primary-very-high;
-    }
-  }
-  
-  .locations-map {
-    display: block;
-    width: 550px;
-    height: 300px;
-    
-    .btn-map {
-      margin-bottom: 0;
-      
-      .fa {
-        margin-right: 0;
-      }
-    }
-  }
-}
-
-.user-main .location-and-website.map-location-enabled {
-  .user-profile-location,
-  .user-profile-website {
-    display: none;
-  }
-  
-  .replace-location .user-profile-location,
-  .replace-location .user-profile-website {
-    display: block;
-  }
-  
-  .btn-show-map {
-    background-color: transparent;
-    color: $primary-medium;
-    margin: 0;
-    padding: 0px 8px;
-    min-height: 0;
-    
-    .d-icon {
-      color: $primary-medium;
-    }
-    
-    &:hover,
-    &:hover .d-icon {
-      color: $primary-high;
-    }
-  }
-  
-  .map-location .locations-map {	
-    display: block;
-    min-width: 550px;
-    height: 300px;
-    
-    a[href] {
-      text-decoration: none;
-    }
-  }
-}
-
-.map-location {
-  margin-right: 7px;
-}
-
 .topic-body .user-location {
   padding: 0 11px 0.25em 11px;
+}
+
+.location-details {
+  position: relative;
+  margin-top: 7px;
+
+  .location-label-container {
+    display: flex;
+    align-items: center;
+
+    .location-label {
+      line-height: 18px;
+      max-width: 500px;
+      display: inline-block;
+
+      .fa {
+        margin-right: 4px;
+      }
+    }
+
+    .location-topic-map {
+      white-space: nowrap;
+      position: relative;
+      display: inline-block;
+      margin-left: 8px;
+    }
+  }
 }

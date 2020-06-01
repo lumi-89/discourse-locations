@@ -26,7 +26,7 @@ load File.expand_path('../models/location_country_default_site_setting.rb', __FI
 load File.expand_path('../models/location_geocoding_language_site_setting.rb', __FILE__)
 
 if respond_to?(:register_svg_icon)
-  register_svg_icon "map-o"
+  register_svg_icon "far-map"
   register_svg_icon "info"
   register_svg_icon "expand"
 end
@@ -93,6 +93,11 @@ after_initialize do
   register_editable_user_custom_field :geo_location if defined? register_editable_user_custom_field
   register_editable_user_custom_field geo_location: {} if defined? register_editable_user_custom_field
   add_to_serializer(:user, :geo_location, false) { object.custom_fields['geo_location'] }
+  add_to_serializer(:user_card, :geo_location, false) { object.custom_fields['geo_location'] }
+  add_to_serializer(:user_card, :include_geo_location?) do
+    object.custom_fields['geo_location'].present? &&
+    object.custom_fields['geo_location'] != "{}"
+  end
 
   require_dependency 'directory_item_serializer'
   class ::DirectoryItemSerializer::UserSerializer
@@ -111,33 +116,28 @@ after_initialize do
   public_user_custom_fields.push('geo_location') unless public_user_custom_fields.include?('geo_location')
   SiteSetting.public_user_custom_fields = public_user_custom_fields.join('|')
 
-  PostRevisor.track_topic_field(:location)
-
-  PostRevisor.class_eval do
-    track_topic_field(:location) do |tc, location|
-      if location.present?
-        location = location.permit(:name, :geo_location => {})
-
-        if location = Locations::Helper.parse_location(location.to_h)
-          tc.record_change('location', tc.topic.custom_fields['location'], location)
-          tc.topic.custom_fields['location'] = location
-          tc.topic.custom_fields['has_geo_location'] = location['geo_location'].present?
-        end
-      else
-        tc.topic.custom_fields['location'] = {}
-        tc.topic.custom_fields['has_geo_location'] = false
-      end
+  PostRevisor.track_topic_field(:location) do |tc, location|
+    if location.present? && 
+       location = Locations::Helper.parse_location(location.to_unsafe_hash)
+      
+      tc.record_change('location', tc.topic.custom_fields['location'], location)
+      tc.topic.custom_fields['location'] = location
+      tc.topic.custom_fields['has_geo_location'] = location['geo_location'].present?
+    else
+      tc.topic.custom_fields['location'] = {}
+      tc.topic.custom_fields['has_geo_location'] = false
     end
   end
 
   DiscourseEvent.on(:post_created) do |post, opts, user|
-    if post.is_first_post? && opts[:location].present?
-      if location = Locations::Helper.parse_location(opts[:location])
-        topic = Topic.find(post.topic_id)
-        topic.custom_fields['location'] = location
-        topic.custom_fields['has_geo_location'] = location['geo_location'].present?
-        topic.save!
-      end
+    if post.is_first_post? &&
+       opts[:location].present? &&
+       location = Locations::Helper.parse_location(opts[:location])
+      
+      topic = post.topic
+      topic.custom_fields['location'] = location
+      topic.custom_fields['has_geo_location'] = location['geo_location'].present?
+      topic.save!
     end
   end
 
@@ -235,27 +235,12 @@ end
 
 DiscourseEvent.on(:layouts_ready) do
   if defined?(DiscourseLayouts) == 'constant' && DiscourseLayouts.class == Module
-    DiscourseLayouts::WidgetHelper.add_widget('layouts-map')
+    DiscourseLayouts::Widget.add('layouts-map')
   end
 end
 
 DiscourseEvent.on(:custom_wizard_ready) do
   if defined?(CustomWizard) == 'constant' && CustomWizard.class == Module
     CustomWizard::Field.add_assets('location', 'discourse-locations', ['components', 'helpers', 'lib', 'stylesheets', 'templates'])
-
-    ## user.geo_location requires location['geo_location'] to be the value
-    CustomWizard::Builder.add_field_validator('location') do |field, updater, step_template|
-      if step_template['actions'].present?
-        step_template['actions'].each do |a|
-          if a['type'] === 'update_profile'
-            a['profile_updates'].each do |pu|
-              if pu['key'] === field['id'] && pu['value_custom'] === 'geo_location'
-                updater.fields[field['id']] = updater.fields[field['id']]['geo_location']
-              end
-            end
-          end
-        end
-      end
-    end
   end
 end
