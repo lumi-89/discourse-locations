@@ -1,18 +1,22 @@
 import { withPluginApi } from 'discourse/lib/plugin-api';
+import { default as discourseComputed } from 'discourse-common/utils/decorators';
 import { or } from "@ember/object/computed";
 
 export default {
   name:'location-map-renderer',
-  initialize(){
+  initialize(container){
     withPluginApi('0.8.12', api => {
 
-      if (Discourse.SiteSettings.location_hamburger_menu_map_link) {
+      const siteSettings = container.lookup('site-settings:main');
+
+      if (siteSettings.location_hamburger_menu_map_link) {
         api.decorateWidget('hamburger-menu:generalLinks', () => {
           return { route: 'discovery.map', label: 'filters.map.title' };
         });
-      }
+      };
 
       api.modifyClass('route:users', {
+
         refreshQueryWithoutTransition: false,
 
         beforeModel(transition) {
@@ -21,18 +25,21 @@ export default {
         },
 
         handleMapTransition(transition) {
+                  debugger;
           const intent = transition.intent;
+          const name = transition.targetName
+          const queryParams = intent.router.activeTransition.to.queryParams
 
-          if (intent.url == "/u" && !intent.name && Discourse.SiteSettings.location_users_map_default) {
+          if (intent.url == "/u" && siteSettings.location_users_map_default) {
             return this.replaceWith('users.user-map');
           }
 
-          if (intent.name === 'users.user-map') {
-            if (!intent.queryParams.period || intent.queryParams.period !== 'location') {
+          if (name === 'users.user-map') {
+            if (!queryParams.period || queryParams.period !== 'location') {
               this.changePeriod(transition, 'location');
             }
-          } else if (intent.name === 'users.index') {
-            if (intent.queryParams.period === 'location') {
+          } else if (name === 'users.index') {
+            if (queryParams.period === 'location') {
               this.changePeriod(transition, 'weekly');
             }
           }
@@ -42,7 +49,7 @@ export default {
           // abort is necessary here because of https://github.com/emberjs/ember.js/issues/12169
           transition.abort();
 
-          return this.replaceWith(transition.intent.name, { queryParams: { period }});
+          return this.replaceWith(transition.targetName, { queryParams: { period }});
         },
 
         renderTemplate() {
@@ -57,13 +64,12 @@ export default {
         }
       });
 
-      api.modifyClass('component:user-card-contents', {
-        hasLocationOrWebsite: or(
-          "user.location",
-          "user.website_name",
-          "user.geo_location"
-        )
-      })
+      api.modifyClass ('component:user-card-contents', {
+        @discourseComputed("user")
+        hasLocaleOrWebsite(user) {
+          return user.geo_location || user.location || user.website_name || this.userTimezone;
+        }
+      });
     });
   }
 };
