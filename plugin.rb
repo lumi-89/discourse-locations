@@ -233,14 +233,8 @@ after_initialize do
   DiscourseEvent.trigger(:locations_ready)
 end
 
-DiscourseEvent.on(:layouts_ready) do
-  if defined?(DiscourseLayouts) == 'constant' && DiscourseLayouts.class == Module
-    DiscourseLayouts::Widget.add('layouts-map')
-  end
-end
-
 DiscourseEvent.on(:custom_wizard_ready) do
   if defined?(CustomWizard) == 'constant' && CustomWizard.class == Module
-    CustomWizard::Field.add_assets('location', 'discourse-locations', ['components', 'helpers', 'lib', 'stylesheets', 'templates'])
+    CustomWizard::Field.register('location', 'discourse-locations', ['components', 'helpers', 'lib', 'stylesheets', 'templates'])
   end
 end

@@ -10,6 +10,7 @@ import { withPluginApi } from 'discourse/lib/plugin-api';
 import { geoLocationFormat } from '../lib/location-utilities';
 import { scheduleOnce } from "@ember/runloop";
 import I18n from "I18n";
+import { longDate } from "discourse/lib/formatter";
 
 export default {
   name: 'location-edits',
@@ -36,6 +37,14 @@ export default {
             geoLocationFormat(currentUser.custom_fields.geo_location, site.country_codes, opts)
           );
         }
+      });
+      api.modifyClass("controller:users", {
+        loadUsers(params) {
+          if (params.period === "location") {
+            return;
+          }
+          this._super(params);
+        },
       });
     });
 
@@ -70,7 +79,7 @@ export default {
         if (force) return true;
         if (categoryId) {
           const category = this.site.categories.findBy('id', categoryId);
-          if (category.custom_fields.location_enabled) return true;
+          if (category && category.custom_fields.location_enabled) return true;
         }
         return false;
       },
@@ -167,7 +176,6 @@ export default {
     const mapRoutes = [
       `Map`,
       `MapCategory`,
-      `MapParentCategory`,
       `MapCategoryNone`
     ];
 
@@ -191,7 +199,6 @@ export default {
 
     const categoryRoutes = [
       'category',
-      'parentCategory',
       'categoryNone'
     ];
 

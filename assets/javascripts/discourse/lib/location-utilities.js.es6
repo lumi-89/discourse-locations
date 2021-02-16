@@ -1,5 +1,6 @@
 import { ajax } from './ajax';
 import { Promise } from "rsvp";
+import { debounce } from "@ember/runloop";
 import I18n from "I18n";
 
 function locationSearch(request, resultsFn) {
@@ -25,16 +26,20 @@ function locationSearch(request, resultsFn) {
 let geoLocationSearch = (request, location_geocoding_debounce) => {
   if (!request) return;
 
-  var debouncedLocationSearch = _.debounce(locationSearch, location_geocoding_debounce);
-
-  return new Promise(function(resolve, reject) {
-    debouncedLocationSearch(request, function(r) {
-      if (r.error) {
-        reject(r.message);
-      } else {
-        resolve(r);
-      };
-    });
+  return new Promise(function (resolve, reject) {
+    debounce(
+      this,
+      function () {
+        locationSearch(request, function (r) {
+          if (r.error) {
+            reject(r.message);
+          } else {
+            resolve(r);
+          }
+        });
+      },
+      location_geocoding_debounce
+    );
   });
 };
 
