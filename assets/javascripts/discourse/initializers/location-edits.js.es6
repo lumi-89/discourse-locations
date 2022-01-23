@@ -39,8 +39,10 @@ export default {
         }
       });
       api.modifyClass("controller:users", {
+        pluginId: "locations-plugin",
+        
         loadUsers(params) {
-          if (params.period === "location") {
+          if (params !== undefined && params.period === "location") {
             return;
           }
           this._super(params);
