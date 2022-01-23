@@ -47,29 +47,35 @@ let formatLocation = function(location, country_codes, attrs = []) {
   let result = '';
 
   attrs.forEach(function(a, i) {
-    let attr = a.split(/:(.+)/).filter(at => at !== '');
-    let key = attr[0];
-    let value = location[key];
-    let index = attr.length > 1 ? attr[1] : null;
-
-    if (value) {
-      let part = value;
-
-      if (key === 'countrycode') {
-        let country = country_codes.find(c => c.code === value);
-
-        if (country) part = country.name;
-      }
-
-      if (index) {
-        let formatArr = part.split(',');
-        part = formatArr[index];
-      }
-
-      result += part;
-
-      if (i < attrs.length - 1) {
-        result += ', ';
+    let choices = a.split('=>');
+    
+    for (let c of choices) {
+      let attr = c.trim().split(/:(.+)/).filter(at => at !== '');
+      let key = attr[0];
+      let value = location[key];
+      let index = attr.length > 1 ? attr[1] : null;
+  
+      if (value) {
+        let part = value;
+  
+        if (key === 'countrycode') {
+          let country = country_codes.find(c => c.code === value);
+  
+          if (country) part = country.name;
+        }
+  
+        if (index) {
+          let formatArr = part.split(',');
+          part = formatArr[index];
+        }
+  
+        result += part;
+  
+        if (i < attrs.length - 1) {
+          result += ', ';
+        }
+      
+      break;
       }
     }
   });
