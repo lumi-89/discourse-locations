@@ -1,7 +1,8 @@
 # name: discourse-locations
 # about: Tools for handling locations in Discourse
-# version: 6.2.1
+# version: 6.2.9
 # authors: Angus McLeod, Robert Barrow
+# contact_emails: development@pavilion.tech
 # url: https://github.com/angusmcleod/discourse-locations
 
 enabled_site_setting :location_enabled
@@ -90,8 +91,7 @@ after_initialize do
   add_to_serializer(:topic_list_item, :include_location?) { object.location.present? }
 
   User.register_custom_field_type('geo_location', :json)
-  register_editable_user_custom_field :geo_location if defined? register_editable_user_custom_field
-  register_editable_user_custom_field geo_location: {} if defined? register_editable_user_custom_field
+  register_editable_user_custom_field [:geo_location,  geo_location: {}] if defined? register_editable_user_custom_field
   add_to_serializer(:user, :geo_location, false) { object.custom_fields['geo_location'] }
   add_to_serializer(:user_card, :geo_location, false) { object.custom_fields['geo_location'] }
   add_to_serializer(:user_card, :include_geo_location?) do
@@ -117,9 +117,9 @@ after_initialize do
   SiteSetting.public_user_custom_fields = public_user_custom_fields.join('|')
 
   PostRevisor.track_topic_field(:location) do |tc, location|
-    if location.present? && 
+    if location.present? &&
        location = Locations::Helper.parse_location(location.to_unsafe_hash)
-      
+
       tc.record_change('location', tc.topic.custom_fields['location'], location)
       tc.topic.custom_fields['location'] = location
       tc.topic.custom_fields['has_geo_location'] = location['geo_location'].present?
@@ -133,7 +133,7 @@ after_initialize do
     if post.is_first_post? &&
        opts[:location].present? &&
        location = Locations::Helper.parse_location(opts[:location])
-      
+
       topic = post.topic
       topic.custom_fields['location'] = location
       topic.custom_fields['has_geo_location'] = location['geo_location'].present?
@@ -233,8 +233,31 @@ after_initialize do
   DiscourseEvent.trigger(:locations_ready)
 end
 
-DiscourseEvent.on(:custom_wizard_ready) do
+on(:custom_wizard_ready) do
   if defined?(CustomWizard) == 'constant' && CustomWizard.class == Module
-    CustomWizard::Field.register('location', 'discourse-locations', ['components', 'helpers', 'lib', 'stylesheets', 'templates'])
+    CustomWizard::Field.register('location', 'discourse-locations')
+    CustomWizard::Action.register_callback(:before_create_topic) do |params, wizard, action, submission|
+      if action['add_location']
+        location = CustomWizard::Mapper.new(
+          inputs: action['add_location'],
+          data: submission&.fields_and_meta,
+          user: wizard.user
+        ).perform
+
+        if location.present?
+          location = Locations::Helper.parse_location(location)
+
+          location_params = {}
+          location_params['location'] = location
+          location_params['has_geo_location'] = location['geo_location'].present?
+
+          params[:topic_opts] ||= {}
+          params[:topic_opts][:custom_fields] ||= {}
+          params[:topic_opts][:custom_fields].merge!(location_params)
+        end
+      end
+
+      params
+    end
   end
 end
