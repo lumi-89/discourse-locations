@@ -179,21 +179,23 @@ export default {
           wiki: false,
           user_custom_fields: {
             geo_location: {
-               lat: "48.8497018",
-               lon: "2.3516467",
-               address: "Bar à Iode - Saint-Germaine, Boulevard Saint-Germain, Quartier Saint-Victor, 5th Arrondissement, Paris, Ile-de-France, Metropolitan France, 75005, France",
-               countrycode: "fr",
-               city: "Paris",
-               state: "Ile-de-France",
-               country: "France",
-               postalcode: "75005",
-               boundingbox: [
+              lat: "48.8497018",
+              lon: "2.3516467",
+              address:
+                "Bar à Iode - Saint-Germaine, Boulevard Saint-Germain, Quartier Saint-Victor, 5th Arrondissement, Paris, Ile-de-France, Metropolitan France, 75005, France",
+              countrycode: "fr",
+              city: "Paris",
+              state: "Ile-de-France",
+              country: "France",
+              postalcode: "75005",
+              boundingbox: [
                 "48.8496518",
                 "48.8497518",
                 "2.3515967",
-                "2.3516967"],
-              type: "restaurant"
-           }
+                "2.3516967",
+              ],
+              type: "restaurant",
+            },
           },
           notice: {
             type: "returning_user",
@@ -933,6 +935,26 @@ export default {
     show_read_indicator: false,
     thumbnails: null,
     slow_mode_enabled_until: null,
+    location: {
+      street: "Pompidou",
+      city: "Paris",
+      countrycode: "fr",
+      geo_location: {
+        lat: 48.835681,
+        lon: 2.3800937,
+        address:
+          "Paris, Bercy Seine, Quai de Bercy, Quartier de Bercy, 12th Arrondissement, Paris, Ile-de-France, Metropolitan France, 75012, France",
+        countrycode: "fr",
+        city: "Paris",
+        state: "Ile-de-France",
+        country: "France",
+        postalcode: "75012",
+        boundingbox: ["48.835631", "48.835731", "2.3800437", "2.3801437"],
+        type: "bus_stop",
+        selected: true,
+        zoomTo: true,
+      },
+    },
     details: {
       can_edit: true,
       notification_level: 2,
