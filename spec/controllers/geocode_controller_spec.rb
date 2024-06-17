@@ -1,6 +1,7 @@
+# frozen_string_literal: true
 require 'rails_helper'
 
-describe ::Locations::GeoController do
+describe ::Locations::GeocodeController do
   routes { ::Locations::Engine.routes }
 
   let!(:user) { log_in(:user) }
@@ -15,29 +16,30 @@ describe ::Locations::GeoController do
         .to_return(status: 200, body: '', headers: {})
 
       get :search, params: { request: '10 Downing Street' }, format: :json
-      expect(response).to be_success
+      expect(response).to have_http_status(:successful)
     end
 
     it 'rate limits geocode searches' do
       RateLimiter.stubs(:disabled?).returns(false)
-      RateLimiter.clear_all!
+      RateLimiter.clear_all_global!
 
       6.times do
         get :search, params: { request: '10 Downing Street' }, format: :json
-        expect(response).to be_success
+        expect(response).to have_http_status(:successful)
       end
 
       get :search, params: { request: '10 Downing Street' }, format: :json
-      expect(response).not_to be_success
+      expect(response).not_to have_http_status(:successful)
     end
   end
 
   describe 'country_codes' do
     it 'works' do
-      get :country_codes, format: :json
-      expect(response).to be_success
+      get :countries, format: :json
+      expect(response).to have_http_status(:successful)
       json = ::JSON.parse(response.body)
-      expect(json['country_codes'][0]['code']).to eq('af')
+
+      expect(json['geocode'][0]['code']).to eq('af')
     end
   end
 end

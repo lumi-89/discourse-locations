@@ -2,7 +2,7 @@ plugins:
   location_enabled:
     client: true
     default: true
-  location_hamburger_menu_map_link:
+  location_sidebar_menu_map_link:
     client: true
     default: false
   location_input_fields_enabled:
@@ -20,6 +20,9 @@ plugins:
       - state
       - countrycode
       - coordinates
+  location_auto_infer_street_from_address_data:
+    client: true
+    default: false
   location_geocoding:
     client: true
     type: enum
@@ -77,6 +80,15 @@ plugins:
     client: true
   location_map_marker_zoom:
     default: 16
+    client: true
+  location_marker_map_padding_extent:
+    default: 0.1
+    client: true
+  location_alternative_marker_map_padding_strategy:
+    default: false
+    client: true
+  location_alternative_marker_map_padding_zoom_out_extent:
+    default: 0.5
     client: true
   location_map_marker_cluster_multiplier:
     default: 6
@@ -145,7 +157,7 @@ plugins:
     client: false
   location_topic_default:
     type: enum
-    default: 'none'
+    default: none
     client: true
     choices:
       - none
