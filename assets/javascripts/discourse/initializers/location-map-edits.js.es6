@@ -1,5 +1,6 @@
 import { withPluginApi } from "discourse/lib/plugin-api";
 import { default as discourseComputed } from "discourse-common/utils/decorators";
+import I18n from "I18n";
 
 const PLUGIN_ID = "locations-plugin";
 
@@ -9,62 +10,74 @@ export default {
     withPluginApi("0.8.12", (api) => {
       const siteSettings = container.lookup("site-settings:main");
 
-      if (siteSettings.location_hamburger_menu_map_link) {
-        api.decorateWidget("hamburger-menu:generalLinks", () => {
-          return { route: "discovery.map", label: "filters.map.title" };
+      if (siteSettings.location_sidebar_menu_map_link) {
+        api.addCommunitySectionLink({
+          name: "map",
+          route: "discovery.map",
+          title: I18n.t("filters.map.title"),
+          text: I18n.t("filters.map.label"),
         });
       }
 
-      api.modifyClass("route:users", {
-        pluginId: PLUGIN_ID,
+      if (siteSettings.location_users_map) {
+        api.addCommunitySectionLink({
+          name: "users map",
+          route: "locations.users-map",
+          title: I18n.t("directory.map.title"),
+          text: I18n.t("directory.map.title"),
+        });
+      }
 
-        refreshQueryWithoutTransition: false,
+      // api.modifyClass("route:users", {
+      //   pluginId: PLUGIN_ID,
 
-        beforeModel(transition) {
-          this.handleMapTransition(transition);
-          this._super(transition);
-        },
+      //   refreshQueryWithoutTransition: false,
 
-        handleMapTransition(transition) {
-          const intent = transition.intent;
-          const name = transition.targetName;
-          const queryParams = intent.router.activeTransition.to.queryParams;
+      //   beforeModel(transition) {
+      //     this.handleMapTransition(transition);
+      //     this._super(transition);
+      //   },
 
-          if (intent.url === "/u" && siteSettings.location_users_map_default) {
-            return this.replaceWith("users.user-map");
-          }
+      //   handleMapTransition(transition) {
+      //     const intent = transition.intent;
+      //     const name = transition.targetName;
+      //     const queryParams = intent.router.activeTransition.to.queryParams;
 
-          if (name === "users.user-map") {
-            if (!queryParams.period || queryParams.period !== "location") {
-              this.changePeriod(transition, "location");
-            }
-          } else if (name === "users.index") {
-            if (queryParams.period === "location") {
-              this.changePeriod(transition, "weekly");
-            }
-          }
-        },
+      //     if (intent.url === "/u" && siteSettings.location_users_map_default) {
+      //       return this.replaceWith("users.user-map");
+      //     }
 
-        changePeriod(transition, period) {
-          // abort is necessary here because of https://github.com/emberjs/ember.js/issues/12169
-          transition.abort();
+      //     if (name === "users.user-map") {
+      //       if (!queryParams.period || queryParams.period !== "location") {
+      //         this.changePeriod(transition, "location");
+      //       }
+      //     } else if (name === "users.index") {
+      //       if (queryParams.period === "location") {
+      //         this.changePeriod(transition, "weekly");
+      //       }
+      //     }
+      //   },
 
-          return this.replaceWith(transition.targetName, {
-            queryParams: { period },
-          });
-        },
+      //   changePeriod(transition, period) {
+      //     // abort is necessary here because of https://github.com/emberjs/ember.js/issues/12169
+      //     transition.abort();
 
-        renderTemplate() {
-          this.render("users");
-        },
+      //     return this.replaceWith(transition.targetName, {
+      //       queryParams: { period },
+      //     });
+      //   },
 
-        actions: {
-          willTransition(transition) {
-            this.handleMapTransition(transition);
-            this._super(transition);
-          },
-        },
-      });
+      //   renderTemplate() {
+      //     this.render("users");
+      //   },
+
+      //   actions: {
+      //     willTransition(transition) {
+      //       this.handleMapTransition(transition);
+      //       this._super(transition);
+      //     },
+      //   },
+      // });
 
       api.modifyClass("component:user-card-contents", {
         pluginId: PLUGIN_ID,

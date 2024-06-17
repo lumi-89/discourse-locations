@@ -2,6 +2,7 @@
 
 import { emojiUnescape } from "discourse/lib/text";
 import DiscourseURL from "discourse/lib/url";
+import getURL from "discourse-common/lib/get-url";
 
 const generateMap = function (siteSettings, opts) {
   const element = document.createElement("div");
@@ -33,7 +34,9 @@ const generateMap = function (siteSettings, opts) {
 
   L.tileLayer(siteSettings.location_map_tile_layer, tileOpts).addTo(map);
 
-  L.Icon.Default.imagePath = "/plugins/discourse-locations/leaflet/images/";
+  L.Icon.Default.imagePath = getURL(
+    "/plugins/discourse-locations/leaflet/images/"
+  );
 
   L.control.zoom({ position: "bottomleft" }).addTo(map);
 
@@ -61,8 +64,25 @@ const setupMap = function (
       [b[1], b[3]],
     ]);
   } else if (markers) {
-    const maxZoom = siteSettings.location_map_marker_zoom;
-    map.fitBounds(markers.getBounds().pad(0.1), { maxZoom });
+    if (siteSettings.location_alternative_marker_map_padding_strategy) {
+      let bounds = markers.getBounds();
+      let fitZoom = map.getBoundsZoom(bounds);
+
+      map.setView(
+        bounds.getCenter(),
+        fitZoom -
+          siteSettings.location_alternative_marker_map_padding_zoom_out_extent
+      );
+    } else {
+      const maxZoom = siteSettings.location_map_marker_zoom;
+
+      map.fitBounds(
+        markers
+          .getBounds()
+          .pad(siteSettings.location_marker_map_padding_extent),
+        { maxZoom }
+      );
+    }
   } else {
     const defaultLat = Number(siteSettings.location_map_center_lat);
     const defaultLon = Number(siteSettings.location_map_center_lon);
@@ -112,33 +132,22 @@ const buildMarker = function (
     const avatarSize = window.devicePixelRatio > 1 ? "60" : "30";
     const userAvatar = rawMarker.options.avatar.replace("{size}", avatarSize);
 
-    const markerStyles = `
-      background-color: dimgrey;
-      width: 30px;
-      height: 30px;
-      display: block;
-      left: -18px;
-      top: -0px;
-      position: relative;
-      border-radius: 50% 50% 0;
-      transform: rotate(45deg);
-      border: 3px solid dimgrey;
-      z-index: 100;`;
+    const href = rawMarker.options.routeTo
+      ? getURL(rawMarker.options.routeTo)
+      : null;
 
-    const avatarStyles = `
-      width: 100%;
-      border-radius: 50%;
-      transform: rotate(-45deg);`;
+    const html = href
+      ? `<a href="${href}" class="avatar-marker" data-user-card="${rawMarker.options.title}"><img src="${userAvatar}" class="avatar"></a>`
+      : `<span class="avatar-marker" data-user-card="${rawMarker.options.title}"><img src="${userAvatar}" class="avatar"></span>`;
 
     rawMarker.options["icon"] = L.divIcon({
       className: "",
       iconAnchor: [0, 44],
       labelAnchor: [-25, 0],
       popupAnchor: [10, -36],
-      html: `<span style="${markerStyles}" class="avatar-marker"><img src="${userAvatar}" style="${avatarStyles}" class="avatar"></span>`,
+      html,
     });
   }
-
   const marker = L.marker(
     {
       lat: rawMarker.lat,
@@ -148,7 +157,7 @@ const buildMarker = function (
   );
 
   if (rawMarker.options) {
-    if (rawMarker.options.routeTo) {
+    if (!avatarMarkerStyle && rawMarker.options.routeTo) {
       marker.on("click", () => {
         DiscourseURL.routeTo(rawMarker.options.routeTo);
       });
@@ -222,7 +231,6 @@ const addMarkersToMap = function (
   } else {
     markers = L.featureGroup();
   }
-
   rawMarkers.forEach((raw) => {
     markers.addLayer(
       buildMarker(raw, map, location_user_avatar, location_hide_labels)
