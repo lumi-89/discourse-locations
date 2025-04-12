@@ -1,7 +1,7 @@
 import { htmlSafe } from "@ember/template";
+import Site from "discourse/models/site";
 import { helperContext, registerRawHelper } from "discourse-common/lib/helpers";
 import { locationFormat } from "../lib/location-utilities";
-import Site from "discourse/models/site";
 
 registerRawHelper("location-format", _locationFormat);
 export default function _locationFormat(location, opts) {
@@ -12,6 +12,7 @@ export default function _locationFormat(location, opts) {
       Site.currentProp("country_codes"),
       siteSettings.location_input_fields_enabled,
       siteSettings.location_input_fields,
+      siteSettings.location_short_names,
       { ...opts }
     )
   );
